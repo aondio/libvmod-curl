@@ -3,7 +3,9 @@ varnishtest "Test curl vmod"
 server s1 {
 	rxreq
 	expect req.request == GET
-	txresp -hdr "Foo: bar" -body "Test"
+	send "HTTP/1.1 200 Ok\r\nFoo: bar\r\nContent-Length: 8\r\n\r\n"
+	send "Test\r\n"
+	send "\r\n"
 	accept
 	rxreq
 	expect req.request == GET
@@ -68,7 +70,7 @@ client c1 {
 	txreq -url "/" -hdr "func: GET"
 	rxresp
 	expect resp.http.foo == "bar"
-	expect resp.http.cl == "4"
+	expect resp.http.cl == "8"
 	expect resp.status == 200
 	expect resp.http.body == "Test"
 } -run
